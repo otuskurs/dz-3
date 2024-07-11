@@ -1,0 +1,129 @@
+vagrant@ansible:~/ansible$ ansible-playbook main.yml
+PLAY [Setup Nginx server] *******************************************************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [install package] **********************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Download key] *************************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Add nginx repository] *****************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [new file] *****************************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Update apt-get repo and cache] ********************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Install nginx] ************************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Apply Nginx template] *****************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Enable new site] **********************************************************************************************************************************************************************************************************************
+ok: [192.168.74.13]
+
+TASK [Restart nginx] ************************************************************************************************************************************************************************************************************************
+changed: [192.168.74.13]
+
+PLAY RECAP **********************************************************************************************************************************************************************************************************************************
+
+vagrant@ansible:~$ exit
+logout
+Connection to 127.0.0.1 closed.
+
+C:\Users\User\test>vagrant ssh webnginx
+Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-113-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Jul 11 13:57:57 UTC 2024
+
+  System load:  0.0               Processes:               107
+  Usage of /:   6.0% of 38.70GB   Users logged in:         1
+  Memory usage: 12%               IPv4 address for enp0s3: 10.0.2.15
+  Swap usage:   0%
+
+ * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
+   just raised the bar for easy, resilient and secure K8s cluster deployment.
+
+   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+Last login: Thu Jul 11 13:54:57 2024 from 192.168.74.12
+vagrant@webnginx:~$ systemctl status nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2024-07-11 13:51:00 UTC; 7min ago
+       Docs: man:nginx(8)
+    Process: 53467 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 53468 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+   Main PID: 53470 (nginx)
+      Tasks: 3 (limit: 2309)
+     Memory: 3.3M
+        CPU: 24ms
+     CGroup: /system.slice/nginx.service
+             ├─53470 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─53471 "nginx: worker process" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+             └─53472 "nginx: worker process" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" "" ""
+vagrant@webnginx:~$ cat /etc/nginx/sites-available/default
+server {
+        listen 8080 default_server;
+        listen [::]:8080 default_server;
+
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        server_name _;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+
+}
+vagrant@webnginx:~$ exit
+logout
+Connection to 127.0.0.1 closed.
+
+C:\Users\User\test>curl 192.168.74.13:8080
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+C:\Users\User\test>

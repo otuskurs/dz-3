@@ -1,0 +1,52 @@
+- name: Setup Nginx server
+  hosts: all
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: install package
+      ansible.builtin.apt:
+         pkg: curl, gnupg2, ca-certificates, lsb-release, ubuntu-keyring
+         state: present
+    - name: Download key
+      ansible.builtin.get_url:
+        url: https://nginx.org/keys/nginx_signing.key
+        dest: /etc/apt/keyrings/nginx-archive-keyring.txt
+        mode: '0750'
+        force: true
+    - name: Add nginx repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx"
+        state: present
+    - name: new file
+      copy:
+        content: "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900"
+        dest: /etc/apt/preferences.d/99nginx
+    - name: Update apt-get repo and cache
+      ansible.builtin.apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+    - name: Install nginx
+      ansible.builtin.apt:
+        pkg: nginx
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+    - name: Apply Nginx template
+      ansible.builtin.template:
+        src: ./nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Enable new site
+      ansible.builtin.template:
+        src:  ./nginx.conf.j2
+        dest: /etc/nginx/sites-enabled/default
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Restart nginx
